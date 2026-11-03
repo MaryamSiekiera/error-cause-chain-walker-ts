@@ -32,3 +32,10 @@ The trade-off: this is a **linked-list walker, not a graph visitor**. It follows
 - **Cyclic causes.** Nothing stops `a.cause = b; b.cause = a`. The walker caps at 100 nodes rather than tracking visited objects, because the chain is documented as a list and a depth guard is cheap and predictable.
 - **Non-Error objects in the chain.** Real code sometimes throws plain objects. The walker collects any object with `name`/`message`/`stack` properties so you still see them in the report.
 - **Missing `stack`.** V8 only sets `.stack` when `Error.captureStackTrace` runs. A bare `Object.create(Error.prototype)` has no own `stack`. Such nodes report `stack: null`, not `undefined`, so consumers can distinguish "no stack" from a stack string.
+
+## Design notes
+
+The window stores values eagerly rather than keeping running aggregates. Running
+sums drift with floating point over long streams, and recomputing from a small
+buffer is cheap enough that the drift is not worth the speed.
+
